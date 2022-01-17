@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GluttonousSnake</title>
+</head>
+<body>
+  <pre></pre>
+  
+  <script>
+    class snake {
+      constructor(width, height) {
+        this.width = width
+        this.height = height
+        this.world = null
+        // this.world[5][5] = '>'
+        this.snakeLength = 0
+        this.headPos = null
+        this.tailPos = null
+        this.init()
+
+        // this.width = width
+        // this.height = height
+        // this.world = Array(height).fill(0).map(it => Array(width).fill('.'))
+        // this.snakeLength = 1
+        // this.headPos = {row: 5, rol: 5}
+        // this.tailPos = {row: 5, rol: 5}
+        // this.world[5][5] = '>'
+        // this.randomApple()
+      }
+      init() {
+        this.world = Array(this.height).fill(0).map(it => Array(this.width).fill('.'))
+        this.world[3][3] = '>'
+        this.snakeLength = 1
+        this.headPos = {row: 3, col: 3}
+        this.tailPos = {row: 3, col: 3}
+        this.randomApple()
+      }
+      randomApple() {
+        let row = Math.floor(this.height * Math.random())
+        let col = Math.floor(this.width * Math.random())
+        if (this.world[row][col] == '.') {
+          this.world[row][col] = 'A'
+        } else {
+          this.randomApple()
+        }
+      }
+      getChar(pos) {
+        return this.world[pos.row][pos.col]
+      }
+      setChar(pos, char) {
+        this.world[pos.row][pos.col] = char
+      }
+
+      getNext(pos) {
+        let nextChar = this.getChar(pos)
+        if (nextChar == '^') {
+          return {row: pos.row - 1, col: pos.col}
+        }
+        if (nextChar == 'v') {
+          return {row: pos.row + 1, col: pos.col}
+        }
+        if (nextChar == '<') {
+          return {row: pos.row, col: pos.col - 1}
+        }
+        if (nextChar == '>') {
+          return {row: pos.row, col: pos.col + 1}
+        }
+      }
+
+      next() {
+        let curChar = this.getChar(this.headPos)
+        let nextHeadPos = this.getNext(this.headPos) 
+        let nextChar = this.getChar(nextHeadPos)
+        if (nextChar == '.') {
+          this.setChar(nextHeadPos, curChar)
+          this.headPos = nextHeadPos
+        } else if (nextChar == 'A') {
+          this.setChar(nextHeadPos, curChar)
+          this.headPos = nextHeadPos
+          this.randomApple()
+        }
+        if (nextChar == '.') {
+          let tailNextPos = this.getNext(this.tailPos)
+          this.setChar(this.tailPos, '.')
+          this.tailPos = tailNextPos
+        }
+        return this
+      }
+
+      changeDirection(direction) {
+        switch(direction) {
+          case 'up': return this.setChar(this.headPos, '^')
+          case 'down': return this.setChar(this.headPos, 'v')
+          case 'left': return this.setChar(this.headPos, '<')
+          case 'right': return this.setChar(this.headPos, '>')
+        }
+      }
+      print() {
+        console.log(this.toString())
+      }
+
+      toString() {
+        return this.world.map(row => {
+          return row.map(char => {
+            if (char == '.') {
+              return '⚪'
+            } else if(char == 'A') {
+              return '🍎'
+            } else {
+              return '💚'
+            }
+          }).join('')
+        }).join('\n')
+      }
+    }
+
+    let game = new snake(20,20)
+    let pre = document.querySelector('pre')
+    document.addEventListener('keydown', e => {
+      if (e.key.startsWith('Arrow')) {
+        var direction = e.key.slice(5).toLowerCase()
+        game.changeDirection(direction)
+        clearInterval(id)
+        tick()
+        id = setInterval(tick, 1000)
+      }
+    })
+    pre.textContent = game.toString()
+    function tick() {
+      game.next()
+      pre.textContent = game.toString()
+      // console.log(game.toString())
+    }
+    var id = setInterval(tick, 1000)
+  </script>
+</body>
+</html>
